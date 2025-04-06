@@ -2,7 +2,6 @@ import com.pinterest.ktlint.core.*
 import org.assertj.core.api.Assertions.assertThat
 import org.example.InterfaceNotNullableRule
 import org.example.MethodCallReplaceRule
-import java.math.BigDecimal
 import kotlin.test.Test
 
 class NoInternalImportRuleTest {
