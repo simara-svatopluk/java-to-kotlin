@@ -1,5 +1,6 @@
 import com.pinterest.ktlint.core.*
 import org.assertj.core.api.Assertions.assertThat
+import org.example.InterfaceNotNullableRule
 import org.example.MethodCallReplaceRule
 import java.math.BigDecimal
 import kotlin.test.Test
@@ -72,6 +73,31 @@ class NoInternalImportRuleTest {
         assertThat(code.refactor()).isEqualTo(expected)
     }
 
+    @Test
+    fun `interface remove nullalbes`() {
+        val code = """
+            interface VrbReportCreator {
+                fun getPurchases(timeSpan: TimeSpan?): Stream<Purchase?>?
+
+                fun generateVrbReport(creationDate: Instant?, purchases: Stream<Purchase?>?): VrbReport?
+                
+                fun notNulls(creationDate: Instant, purchases: Stream<Purchase>): VrbReport
+            }
+        """.trimIndent()
+        val expected = """
+            interface VrbReportCreator {
+                fun getPurchases(timeSpan: TimeSpan): Stream<Purchase>
+
+                fun generateVrbReport(creationDate: Instant, purchases: Stream<Purchase>): VrbReport
+                
+                fun notNulls(creationDate: Instant, purchases: Stream<Purchase>): VrbReport
+            }
+        """.trimIndent()
+
+        val refactor = code.refactor()
+        assertThat(refactor).isEqualTo(expected)
+    }
+
     private fun String.refactor() = KtLint.format(
         KtLint.ExperimentalParams(
             text = this,
@@ -79,6 +105,7 @@ class NoInternalImportRuleTest {
                 RuleProvider { MethodCallReplaceRule("formatted", "format") },
                 RuleProvider { MethodCallReplaceRule("getFirst", "first") },
                 RuleProvider { MethodCallReplaceRule("doubleValue", "toDouble") },
+                RuleProvider { InterfaceNotNullableRule() },
             ),
             cb = { e, corrected -> }
         )
