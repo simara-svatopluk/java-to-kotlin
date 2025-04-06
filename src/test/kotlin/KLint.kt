@@ -1,6 +1,7 @@
 import com.pinterest.ktlint.core.*
 import org.assertj.core.api.Assertions.assertThat
 import org.example.MethodCallReplaceRule
+import java.math.BigDecimal
 import kotlin.test.Test
 
 class NoInternalImportRuleTest {
@@ -55,12 +56,29 @@ class NoInternalImportRuleTest {
         assertThat(code.refactor()).isEqualTo(expected)
     }
 
+    @Test
+    fun `doubleValue() to toDouble()`() {
+        val code = """
+            fun doubleValue(name: String) {
+                BigDecimal.ONE.doubleValue()
+            }
+        """.trimIndent()
+        val expected = """
+            fun doubleValue(name: String) {
+                BigDecimal.ONE.toDouble()
+            }
+        """.trimIndent()
+
+        assertThat(code.refactor()).isEqualTo(expected)
+    }
+
     private fun String.refactor() = KtLint.format(
         KtLint.ExperimentalParams(
             text = this,
             ruleProviders = setOf(
                 RuleProvider { MethodCallReplaceRule("formatted", "format") },
                 RuleProvider { MethodCallReplaceRule("getFirst", "first") },
+                RuleProvider { MethodCallReplaceRule("doubleValue", "toDouble") },
             ),
             cb = { e, corrected -> }
         )
