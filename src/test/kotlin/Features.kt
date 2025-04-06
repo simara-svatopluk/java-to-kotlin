@@ -93,8 +93,21 @@ class NoInternalImportRuleTest {
             }
         """.trimIndent()
 
-        val refactor = code.refactor()
-        assertThat(refactor).isEqualTo(expected)
+        assertThat(code.refactor()).isEqualTo(expected)
+    }
+
+    @Test
+    fun `interface @FreeBuilder no changes`() {
+        val code = """
+            import org.inferred.freebuilder.FreeBuilder;
+
+            @FreeBuilder
+            interface Person {
+                fun getId(): String?
+            }
+        """.trimIndent()
+
+        assertThat(code.refactor()).isEqualTo(code)
     }
 
     private fun String.refactor() = KtLint.format(
