@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.stubs.elements.KtClassElementType
 
-class InterfaceNotNullableRule() : Rule("remove-nullables") {
+class InterfaceNotNullableRule : Rule("remove-nullables") {
 
     override fun visit(
         node: ASTNode,
