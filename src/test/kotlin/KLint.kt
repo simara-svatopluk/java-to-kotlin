@@ -21,6 +21,24 @@ class NoInternalImportRuleTest {
         assertThat(code.refactor()).isEqualTo(expected)
     }
 
+//    @Test
+//    fun `formatted() to format() but only on String`() {
+//        val code = """
+//            fun formatted(name: String) {
+//                val object = Object()
+//                println(object.formatted(name))
+//            }
+//        """.trimIndent()
+//        val expected = """
+//            fun formatted(name: String) {
+//                val object = Object()
+//                println(object.formatted(name))
+//            }
+//        """.trimIndent()
+//
+//        assertThat(code.refactor()).isEqualTo(expected)
+//    }
+
     @Test
     fun `getFirst() to first()`() {
         val code = """
@@ -40,10 +58,10 @@ class NoInternalImportRuleTest {
     private fun String.refactor() = KtLint.format(
         KtLint.ExperimentalParams(
             text = this,
-            ruleProviders = setOf(RuleProvider {
-                MethodCallReplaceRule("formatted", "format")
-                MethodCallReplaceRule("getFirst", "first")
-            }),
+            ruleProviders = setOf(
+                RuleProvider { MethodCallReplaceRule("formatted", "format") },
+                RuleProvider { MethodCallReplaceRule("getFirst", "first") },
+            ),
             cb = { e, corrected -> }
         )
     )
