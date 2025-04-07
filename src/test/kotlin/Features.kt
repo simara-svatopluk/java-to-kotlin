@@ -2,6 +2,9 @@ import com.pinterest.ktlint.core.*
 import org.assertj.core.api.Assertions.assertThat
 import org.example.InterfaceNotNullableRule
 import org.example.MethodCallReplaceRule
+import org.example.RequestParamFillNameRule
+import java.time.Clock
+import java.time.Instant
 import kotlin.test.Test
 
 class NoInternalImportRuleTest {
@@ -110,6 +113,46 @@ class NoInternalImportRuleTest {
         assertThat(code.refactor()).isEqualTo(code)
     }
 
+    @Test
+    fun `fill @RequestParam name`() {
+        val code = """
+            @RestController
+            @RequestMapping("/controller")
+            class RestController(
+                private val clock: Clock
+            ) {
+                @GetMapping("/generate")
+                fun generateReport(
+                    @RequestParam(required = false) id: String?,
+                    @RequestParam() empty: String?,
+                    @RequestParam("name", required = false) name: String?,
+                    @RequestParam(name = "surname", required = false) surname: String?,
+                    @RequestParam(required = false, name = "surname") surname: String?,
+                ): ResponseEntity<String?> {}
+            }
+
+        """.trimIndent()
+        val expected = """
+            @RestController
+            @RequestMapping("/controller")
+            class RestController(
+                private val clock: Clock
+            ) {
+                @GetMapping("/generate")
+                fun generateReport(
+                    @RequestParam("id",required = false) id: String?,
+                    @RequestParam("empty") empty: String?,
+                    @RequestParam("name", required = false) name: String?,
+                    @RequestParam(name = "surname", required = false) surname: String?,
+                    @RequestParam(required = false, name = "surname") surname: String?,
+                ): ResponseEntity<String?> {}
+            }
+
+        """.trimIndent()
+
+        assertThat(code.refactor()).isEqualTo(expected)
+    }
+
     private fun String.refactor() = KtLint.format(
         KtLint.ExperimentalParams(
             text = this,
@@ -118,6 +161,7 @@ class NoInternalImportRuleTest {
                 RuleProvider { MethodCallReplaceRule("getFirst", "first") },
                 RuleProvider { MethodCallReplaceRule("doubleValue", "toDouble") },
                 RuleProvider { InterfaceNotNullableRule() },
+                RuleProvider { RequestParamFillNameRule() },
             ),
             cb = { e, corrected -> }
         )
